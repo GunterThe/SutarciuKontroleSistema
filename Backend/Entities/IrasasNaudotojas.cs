@@ -7,10 +7,10 @@ public class IrasasNaudotojas
     public int IrasasId { get; set; }
 
     [ForeignKey("Naudotojas")]
-    public string NaudotojasId { get; set; }
+    public string NaudotojasId { get; set; } = string.Empty;
 
     public bool Prekes_Adminas { get; set; } = false;
 
-    public Irasas Irasas { get; set; }
-    public Naudotojas Naudotojas { get; set; }
+    public Irasas Irasas { get; set; } = null!;
+    public Naudotojas Naudotojas { get; set; } = null!;
 }

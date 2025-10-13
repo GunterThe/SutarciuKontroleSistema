@@ -9,11 +9,12 @@ public class Irasas
 
     [Required]
     [StringLength(20)]
-    public string Id_dokumento { get; set; }
+    public string Id_dokumento { get; set; } = string.Empty;
 
     [Required]
     [StringLength(100)]
-    public string Pavadinimas { get; set; }
+    public string Pavadinimas { get; set; } = string.Empty;
+
 
     [Required]
     public DateTime Isigaliojimo_data { get; set; }
@@ -31,6 +32,11 @@ public class Irasas
     public DateTime Kita_data { get; set; }
     [Required]
     [StringLength(100)]
-    public string Pastas_kreiptis { get; set; }
-    public ICollection<IrasasNaudotojas> Naudotojai { get; set; }
+    public string Pastas_kreiptis { get; set; } = string.Empty;
+
+    [ForeignKey("Tag")]
+    public int TagID { get; set; }
+    public ICollection<IrasasNaudotojas> Naudotojai { get; set; } = new List<IrasasNaudotojas>();
+    public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+    public Tag? Tag { get; set; }
 }

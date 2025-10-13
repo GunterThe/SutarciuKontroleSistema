@@ -7,12 +7,23 @@ public class AppDbContext : DbContext
     public DbSet<Irasas> Irasas { get; set; }
     public DbSet<Naudotojas> Naudotojas { get; set; }
     public DbSet<IrasasNaudotojas> IrasasNaudotojas { get; set; }
+    public DbSet<Tag> Tag { get; set; }
+    public DbSet<Comment> Comment { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<IrasasNaudotojas>()
-            .HasKey(x => new { x.IrasasId, x.NaudotojasId });
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.Irasas)
+            .WithMany(i => i.Comments)
+            .HasForeignKey(c => c.IrasasId)
+            .IsRequired();
 
+        modelBuilder.Entity<Irasas>()
+            .HasOne(i => i.Tag)
+            .WithMany(t => t.Irasai)
+            .HasForeignKey(i => i.TagID)
+            .IsRequired();
+            
         modelBuilder.Entity<IrasasNaudotojas>()
             .HasOne(x => x.Irasas)
             .WithMany(x => x.Naudotojai)
