@@ -12,10 +12,10 @@ public class Comment
 
     [ForeignKey("Irasas")]
     public int IrasasId { get; set; }
-    [ForeignKey("Naudotojas")]
-    public string NaudotojasId { get; set; } = string.Empty;
+        [ForeignKey("Naudotojas")]
+        public string? NaudotojasId { get; set; }
 
-    public Irasas Irasas { get; set; } = null!;
-    public Naudotojas Naudotojas { get; set; } = null!;
+        public Irasas Irasas { get; set; } = null!;
+        public Naudotojas? Naudotojas { get; set; }
 
 }

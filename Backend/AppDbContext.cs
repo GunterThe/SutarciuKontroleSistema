@@ -33,6 +33,9 @@ public class AppDbContext : DbContext
             .HasOne(x => x.Naudotojas)
             .WithMany(x => x.Irasai)
             .HasForeignKey(x => x.NaudotojasId);
+        // composite primary key for join table
+        modelBuilder.Entity<IrasasNaudotojas>()
+            .HasKey(x => new { x.IrasasId, x.NaudotojasId });
 
         modelBuilder.Entity<Irasas>()
             .Property(x => x.Dienos_pries)
