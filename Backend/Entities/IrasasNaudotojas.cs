@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 public class IrasasNaudotojas
 {
@@ -11,6 +12,9 @@ public class IrasasNaudotojas
 
     public bool Prekes_Adminas { get; set; } = false;
 
-    public Irasas Irasas { get; set; } = null!;
-    public Naudotojas Naudotojas { get; set; } = null!;
+    [JsonIgnore]
+    public Irasas? Irasas { get; set; }
+
+    [JsonIgnore]
+    public Naudotojas? Naudotojas { get; set; }
 }

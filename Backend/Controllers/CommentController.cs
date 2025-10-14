@@ -20,16 +20,28 @@ public class CommentController : ControllerBase
     public async Task<IActionResult> Get(int id)
     {
         var c = await _db.Comment.FindAsync(id);
-        if (c == null) return NotFound();
+        if (c == null) 
+            return NotFound();
         return Ok(c);
     }
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Comment))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Create([FromBody] Comment model)
+    public async Task<IActionResult> Create(Comment model)
     {
+        model.Irasas = await _db.Irasas.FindAsync(model.IrasasId);
+
+        if (model.Irasas == null)
+            return BadRequest("Invalid IrasasId");
+        
+        model.Naudotojas = await _db.Naudotojas.FindAsync(model.NaudotojasId);
+
+        if (model.Naudotojas == null)
+            return BadRequest("Invalid NaudotojasId");
+
         _db.Comment.Add(model);
+        
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(Get), new { id = model.Id }, model);
     }
@@ -37,13 +49,25 @@ public class CommentController : ControllerBase
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Update(int id, [FromBody] Comment updated)
+    public async Task<IActionResult> Update(int id, Comment updated)
     {
         var existing = await _db.Comment.FindAsync(id);
-        if (existing == null) return NotFound();
+
+        if (existing == null)
+            return NotFound();
+        
         existing.CommentText = updated.CommentText;
         existing.IrasasId = updated.IrasasId;
         existing.NaudotojasId = updated.NaudotojasId;
+        existing.Irasas = await _db.Irasas.FindAsync(updated.IrasasId);
+
+        if (existing.Irasas == null) 
+            return BadRequest("Invalid IrasasId");
+
+        existing.Naudotojas = await _db.Naudotojas.FindAsync(updated.NaudotojasId);
+        
+        if (existing.Naudotojas == null) 
+            return BadRequest("Invalid NaudotojasId");
         await _db.SaveChangesAsync();
         return NoContent();
     }
@@ -54,7 +78,9 @@ public class CommentController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var existing = await _db.Comment.FindAsync(id);
-        if (existing == null) return NotFound();
+        if (existing == null)
+            return NotFound();
+            
         _db.Comment.Remove(existing);
         await _db.SaveChangesAsync();
         return NoContent();

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 public class Naudotojas
 {
@@ -24,5 +25,6 @@ public class Naudotojas
 
     public bool Adminas { get; set; } = false;
 
+    [JsonIgnore]
     public ICollection<IrasasNaudotojas> Irasai { get; set; } = new List<IrasasNaudotojas>();
 }

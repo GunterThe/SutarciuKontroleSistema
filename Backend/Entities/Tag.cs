@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 public class Tag
 {
@@ -10,5 +11,6 @@ public class Tag
     [StringLength(50)]
     public string Name { get; set; } = string.Empty;
 
+    [JsonIgnore]
     public ICollection<Irasas> Irasai { get; set; } = new List<Irasas>();
 }

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 public class Comment
 {
@@ -12,10 +13,12 @@ public class Comment
 
     [ForeignKey("Irasas")]
     public int IrasasId { get; set; }
-        [ForeignKey("Naudotojas")]
-        public string? NaudotojasId { get; set; }
 
-        public Irasas Irasas { get; set; } = null!;
-        public Naudotojas? Naudotojas { get; set; }
+    [ForeignKey("Naudotojas")]
+    public string? NaudotojasId { get; set; }
+    [JsonIgnore]
+    public Irasas? Irasas { get; set; }
+    [JsonIgnore]
+    public Naudotojas? Naudotojas { get; set; }
 
 }
