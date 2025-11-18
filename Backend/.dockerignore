@@ -1,0 +1,30 @@
+# Build output
+bin/
+obj/
+
+# User-specific
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# IDE
+.vs/
+.idea/
+*.swp
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+**/*.Dockerfile*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Not needed for API image
+sql/

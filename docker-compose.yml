@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mariadb:10.11
+    container_name: sutarciu-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-changeme}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-SutarciuKontrole}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./Backend/sql/SutarciuKontrole.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -uroot -p$${MYSQL_ROOT_PASSWORD} -e 'SELECT 1' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: sutarciu-backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=server=db;port=3306;user=root;password=${MYSQL_ROOT_PASSWORD:-changeme};database=${MYSQL_DATABASE:-SutarciuKontrole};TreatTinyAsBoolean=true;AllowUserVariables=true;
+      # JWT settings (can be overridden via .env file)
+      - Jwt__Issuer=${JWT_ISSUER:-SutarciuKontroleSistema}
+      - Jwt__Audience=${JWT_AUDIENCE:-SutarciuKontroleSistema}
+      - Jwt__Key=${JWT_KEY:-please_set_a_secure_random_key}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+volumes:
+  db_data:
