@@ -22,7 +22,7 @@ public class AuthController : ControllerBase
     public record LoginRequest(string El_pastas, string Password);
     public record RefreshRequest(string RefreshToken);
 
-    [HttpPost("register")]
+        [HttpPost("register")]
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponse>> Register(RegisterRequest req)
     {
@@ -31,8 +31,18 @@ public class AuthController : ControllerBase
             return Conflict(new { message = "Email already registered" });
         }
 
+        int nextId = 1;
+        var allIds = await _db.Naudotojas.Select(u => u.Id).ToListAsync();
+        if (allIds.Count > 0)
+        {
+            var numericIds = allIds.Select(id => int.TryParse(id, out var n) ? n : 0);
+            var maxId = numericIds.Any() ? numericIds.Max() : 0;
+            nextId = maxId + 1;
+        }
+
         var user = new Naudotojas
         {
+            Id = nextId.ToString(),
             Vardas = req.Vardas,
             Pavarde = req.Pavarde,
             Gimimo_data = req.Gimimo_data,

@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 public class Naudotojas
 {
     [Key]
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public string Id { get; set; } = string.Empty;
 
     [Required]
     [StringLength(30)]
