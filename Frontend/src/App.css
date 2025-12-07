@@ -1,0 +1,4 @@
+/* tiny app helpers kept intentionally small; main theme in index.css */
+.container { animation: fadeIn 260ms ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+

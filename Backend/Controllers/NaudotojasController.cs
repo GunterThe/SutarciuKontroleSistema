@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Auth;
 
@@ -35,9 +36,9 @@ public class NaudotojasController : ControllerBase
     }
 
     [HttpGet("{id}/Irasai")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<IrasasNaudotojas>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Irasas>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<IEnumerable<IrasasNaudotojas>>> GetNaudotojasIrasai(string id, bool Archyvuotas)
+    public async Task<ActionResult<IEnumerable<Irasas>>> GetNaudotojasIrasai(string id, bool Archyvuotas)
     {
         var currentUserId = User.GetUserId();
         var isAdmin = User.IsAdmin();
@@ -55,7 +56,13 @@ public class NaudotojasController : ControllerBase
             return NotFound();
         }
 
-        return Ok(naudotojas.Irasai);
+        // Extract Irasas objects from the join entity (IrasasNaudotojas) and filter nulls
+        var irasai = naudotojas.Irasai
+            .Where(x => x.Irasas != null)
+            .Select(x => x.Irasas!)
+            .ToList();
+
+        return Ok(irasai);
     }
 
     [HttpPost]

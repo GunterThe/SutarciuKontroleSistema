@@ -72,6 +72,38 @@ public class CommentController : ControllerBase
         return CreatedAtAction(nameof(Get), new { id = model.Id }, model);
     }
 
+    [HttpGet("Irasas/{irasasId}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Comment>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetForIrasas(int irasasId)
+    {
+        var irasas = await _db.Irasas.FindAsync(irasasId);
+        if (irasas == null) return NotFound();
+
+        var currentUserId = User.GetUserId();
+        var isAdmin = User.IsAdmin();
+        if (!isAdmin)
+        {
+            var hasAccess = await _db.IrasasNaudotojas.AnyAsync(x => x.IrasasId == irasasId && x.NaudotojasId == currentUserId);
+            if (!hasAccess) return Forbid();
+        }
+
+        var comments = await _db.Comment
+            .Where(c => c.IrasasId == irasasId)
+            .Select(c => new {
+                c.Id,
+                c.CommentText,
+                c.IrasasId,
+                c.NaudotojasId,
+                AuthorVardas = c.Naudotojas != null ? c.Naudotojas.Vardas : null,
+                AuthorPavarde = c.Naudotojas != null ? c.Naudotojas.Pavarde : null
+            })
+            .AsNoTracking()
+            .ToListAsync();
+
+        return Ok(comments);
+    }
+
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
