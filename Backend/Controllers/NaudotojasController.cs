@@ -38,7 +38,7 @@ public class NaudotojasController : ControllerBase
     [HttpGet("{id}/Irasai")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Irasas>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<IEnumerable<Irasas>>> GetNaudotojasIrasai(string id, bool Archyvuotas)
+    public async Task<ActionResult> GetNaudotojasIrasai(string id, int Archyvuotas)
     {
         var currentUserId = User.GetUserId();
         var isAdmin = User.IsAdmin();
@@ -47,7 +47,7 @@ public class NaudotojasController : ControllerBase
             return Forbid();
         }
         var naudotojas = await _db.Naudotojas
-            .Include(n => n.Irasai.Where(inu => inu.Irasas != null && inu.Irasas.Archyvuotas == Archyvuotas))
+            .Include(n => n.Irasai.Where(inu => inu.Irasas != null && (inu.Irasas.Archyvuotas == (Archyvuotas == 1))))
                 .ThenInclude(inu => inu.Irasas)
             .FirstOrDefaultAsync(n => n.Id == id);
 
@@ -56,13 +56,27 @@ public class NaudotojasController : ControllerBase
             return NotFound();
         }
 
-        // Extract Irasas objects from the join entity (IrasasNaudotojas) and filter nulls
         var irasai = naudotojas.Irasai
             .Where(x => x.Irasas != null)
             .Select(x => x.Irasas!)
             .ToList();
 
-        return Ok(irasai);
+        // project to a lightweight DTO and represent Archyvuotas as 0/1 to match tinyint storage
+        var projected = irasai.Select(i => new {
+            i.Id,
+            i.Id_dokumento,
+            i.Pavadinimas,
+            i.TagID,
+            i.Isigaliojimo_data,
+            i.Pabaigos_data,
+            i.Dienos_pries,
+            i.Dienu_daznumas,
+            Archyvuotas = i.Archyvuotas ? 1 : 0,
+            i.Kita_data,
+            i.Pastas_kreiptis
+        });
+
+        return Ok(projected);
     }
 
     [HttpPost]

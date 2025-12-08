@@ -7,6 +7,8 @@ import Home from './pages/Home.jsx'
 import IrasasDetails from './pages/IrasasDetails.jsx'
 import IrasasEdit from './pages/IrasasEdit.jsx'
 import IrasasCreate from './pages/IrasasCreate.jsx'
+import Archived from './pages/Archived.jsx'
+import AdminPanel from './pages/AdminPanel.jsx'
 import { getCurrentUser, logout } from './assets/api.jsx'
 
 function App() {
@@ -27,6 +29,9 @@ function App() {
         {user ? (
           <>
             <span>Prisijungęs: {user?.email || user?.name || user?.El_pastas || 'Naudotojas'}</span>
+            {((String(user?.admin ?? user?.Admin ?? user?.Adminas ?? '')).toLowerCase() === 'true') && (
+              <Link to="/admin" style={{ marginLeft: 12 }}>Valdymas</Link>
+            )}
             <button onClick={logout}>Atsijungti</button>
           </>
         ) : (
@@ -46,6 +51,8 @@ function App() {
             <Route path="/irasas/:id" element={user ? <IrasasDetails /> : <Navigate to="/login" replace />} />
             <Route path="/irasas/:id/edit" element={user ? <IrasasEdit /> : <Navigate to="/login" replace />} />
             <Route path="/irasas/new" element={user ? <IrasasCreate /> : <Navigate to="/login" replace />} />
+            <Route path="/archived" element={user ? <Archived /> : <Navigate to="/login" replace />} />
+            <Route path="/admin" element={user ? <AdminPanel /> : <Navigate to="/login" replace />} />
           </Routes>
         </div>
       </main>
@@ -55,4 +62,3 @@ function App() {
 
 export default App
 
-// Home is now provided by `src/pages/Home.jsx`

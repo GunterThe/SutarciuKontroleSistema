@@ -30,7 +30,7 @@ public class IrasasController : ControllerBase
                 i.Pabaigos_data,
                 i.Dienos_pries,
                 i.Dienu_daznumas,
-                i.Archyvuotas,
+                Archyvuotas = i.Archyvuotas ? 1 : 0,
                 i.Kita_data,
                 i.Pastas_kreiptis
             })
@@ -64,7 +64,7 @@ public class IrasasController : ControllerBase
                 i.Pabaigos_data,
                 i.Dienos_pries,
                 i.Dienu_daznumas,
-                i.Archyvuotas,
+                Archyvuotas = i.Archyvuotas ? 1 : 0,
                 i.Kita_data,
                 i.Pastas_kreiptis
             })

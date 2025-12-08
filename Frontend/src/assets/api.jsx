@@ -73,6 +73,20 @@ apiClient.interceptors.response.use(
         return data;
     };
 
+    // Tag CRUD for admin
+    export const createTag = async (payload) => {
+        const { data } = await apiClient.post('/Tag', payload);
+        return data;
+    };
+
+    export const updateTag = async (id, payload) => {
+        await apiClient.put(`/Tag/${id}`, payload);
+    };
+
+    export const deleteTag = async (id) => {
+        await apiClient.delete(`/Tag/${id}`);
+    };
+
     export const getCurrentUser = () => {
         const token = localStorage.getItem('token');
         if (!token) return null;
@@ -89,9 +103,27 @@ apiClient.interceptors.response.use(
         return data;
     };
 
+    export const archiveIrasas = async (id) => {
+        await apiClient.post(`/Irasas/${id}/Archive`);
+    };
+
     export const getCommentsForIrasas = async (irasasId) => {
         const { data } = await apiClient.get(`/Comment/Irasas/${irasasId}`);
         return data;
+    };
+
+    // Admin comment endpoints
+    export const getAllComments = async () => {
+        const { data } = await apiClient.get('/Comment');
+        return data;
+    };
+
+    export const updateComment = async (id, payload) => {
+        await apiClient.put(`/Comment/${id}`, payload);
+    };
+
+    export const deleteComment = async (id) => {
+        await apiClient.delete(`/Comment/${id}`);
     };
 
     export const createComment = async (payload) => {
@@ -103,9 +135,27 @@ apiClient.interceptors.response.use(
         await apiClient.put(`/Irasas/${id}`, payload);
     };
 
+    export const deleteIrasas = async (id) => {
+        await apiClient.delete(`/Irasas/${id}`);
+    };
+
     export const createIrasas = async (payload) => {
         const { data } = await apiClient.post('/Irasas', payload);
         return data;
+    };
+
+    // Naudotojas (users) admin CRUD
+    export const createNaudotojas = async (payload) => {
+        const { data } = await apiClient.post('/Naudotojas', payload);
+        return data;
+    };
+
+    export const updateNaudotojas = async (id, payload) => {
+        await apiClient.put(`/Naudotojas/${id}`, payload);
+    };
+
+    export const deleteNaudotojas = async (id) => {
+        await apiClient.delete(`/Naudotojas/${id}`);
     };
 
     export const logout = () => {

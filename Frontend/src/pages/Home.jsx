@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getNaudotojai, getNaudotojasIrasai, getCurrentUser, getIrasaiAll, getTags } from '../assets/api.jsx'
+import { getNaudotojai, getNaudotojasIrasai, getCurrentUser, getIrasaiAll, getTags, archiveIrasas } from '../assets/api.jsx'
 
 export default function Home() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [refreshToggle, setRefreshToggle] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -25,7 +26,7 @@ export default function Home() {
           // only fetch current user's records (returns array of association objects or irasai)
           const id = current?.sub ?? current?.Sub ?? current?.id ?? current?.Id
           if (!id) throw new Error('Neatitinkanti prisijungusio naudotojo informacija')
-          const resp = await getNaudotojasIrasai(id, false)
+          const resp = await getNaudotojasIrasai(id, 0)
           // backend may return array of Irasas or IrasasNaudotojas; normalize to array of Irasas
           irasaiList = (resp || []).map(item => item?.Irasas ?? item)
         } else {
@@ -33,6 +34,12 @@ export default function Home() {
           const resp = await getIrasaiAll()
           irasaiList = resp || []
         }
+
+        // normalize Archyvuotas values (DB may return 0/1 or '0'/'1')
+        irasaiList = (irasaiList || []).map(ir => ({
+          ...ir,
+          Archyvuotas: (ir?.Archyvuotas === true) || Number(ir?.Archyvuotas) === 1
+        }))
 
         // group irasai by TagID
         const groups = {}
@@ -59,7 +66,18 @@ export default function Home() {
     }
     load()
     return () => { mounted = false }
-  }, [])
+  }, [refreshToggle])
+
+  const onArchive = async (id) => {
+    try {
+      await archiveIrasas(id)
+      // trigger refresh
+      setRefreshToggle(t => !t)
+    } catch (err) {
+      console.error('Archive failed', err)
+      alert(err.response?.data?.message || err.message || 'Klaida archyvuojant įrašą')
+    }
+  }
 
   if (loading) return (
     <div className="centered">
@@ -86,6 +104,7 @@ export default function Home() {
           <div style={{ color: 'var(--muted)' }}>Rūšiuota pagal žymas</div>
         </div>
         <div>
+          <Link to="/archived" className="btn" style={{ marginRight: 8 }}>Archyvuoti įrašai</Link>
           <Link to="/irasas/new" className="btn">Naujas įrašas</Link>
         </div>
       </div>
@@ -112,10 +131,13 @@ export default function Home() {
                         <div style={{ fontWeight: 600 }}>{ir.pavadinimas ?? ir.Pavadinimas ?? ir.Pavadinimas ?? ir.Id_dokumento}</div>
                         <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 6 }}>Galioja: {ir.Isigaliojimo_data ?? ir.Isigaliojimo_data}</div>
                       </div>
-                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         <div style={{ color: 'var(--muted)', fontSize: 13 }}>{ir.Archyvuotas ? 'Archiav.' : 'Aktyvus'}</div>
                         <Link className="btn" to={`/irasas/${ir.Id ?? ir.id}`} style={{ textDecoration: 'none' }}>Atidaryti</Link>
                         <Link className="btn" to={`/irasas/${ir.Id ?? ir.id}/edit`} style={{ textDecoration: 'none', background: '#4caf50' }}>Redaguoti</Link>
+                        {!ir.Archyvuotas && (
+                          <button className="btn" onClick={() => onArchive(ir.Id ?? ir.id)} style={{ background: '#f57c00' }}>Archyvuoti</button>
+                        )}
                       </div>
                     </div>
                   ))}
