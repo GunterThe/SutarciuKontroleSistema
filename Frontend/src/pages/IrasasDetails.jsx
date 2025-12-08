@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getIrasasById, getCommentsForIrasas, createComment } from '../assets/api.jsx'
+import { getIrasasById, getCommentsForIrasas, createComment, getNaudotojai, createIrasasNaudotojas, getIrasasViewers } from '../assets/api.jsx'
 
 export default function IrasasDetails() {
   const { id } = useParams()
@@ -10,6 +10,14 @@ export default function IrasasDetails() {
   const [error, setError] = useState('')
   const [newComment, setNewComment] = useState('')
   const [posting, setPosting] = useState(false)
+  const [showShare, setShowShare] = useState(false)
+  const [users, setUsers] = useState([])
+  const [usersLoading, setUsersLoading] = useState(false)
+  const [userQuery, setUserQuery] = useState('')
+  const [existingViewerIds, setExistingViewerIds] = useState([])
+  const [selectedUsers, setSelectedUsers] = useState([])
+  const [sharing, setSharing] = useState(false)
+  const [shareError, setShareError] = useState('')
 
   useEffect(() => {
     let mounted = true
@@ -60,6 +68,29 @@ export default function IrasasDetails() {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <Link to="/" className="btn">Grįžti</Link>
+          <button className="btn" onClick={async () => {
+            setShowShare(true)
+            setShareError('')
+            setExistingViewerIds([])
+            setUsers([])
+            setUserQuery('')
+            setSelectedUsers([])
+            setUsersLoading(true)
+            try {
+              // fetch users and existing viewers in parallel
+              const [u, v] = await Promise.all([
+                getNaudotojai(),
+                getIrasasViewers(Number(id)).catch(e => [])
+              ])
+              setUsers(u || [])
+              const vids = (v || []).map(x => x.Id ?? x.id).filter(Boolean)
+              setExistingViewerIds(vids)
+            } catch (err) {
+              setShareError(err.response?.data?.message || err.message || 'Klaida užkraunant vartotojus')
+            } finally {
+              setUsersLoading(false)
+            }
+          }}>Pridėti peržiūros vartotojus</button>
           <Link to={`/irasas/${id}/edit`} className="btn" style={{ background: '#4caf50' }}>Redaguoti</Link>
         </div>
       </div>
@@ -72,6 +103,73 @@ export default function IrasasDetails() {
           <div><strong>Ar archyvuotas:</strong> {irasas?.archyvuotas ? 'Taip' : 'Ne'}</div>
         </div>
       </div>
+
+      {showShare && (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', zIndex: 30 }}>
+          <div style={{ width: 720, maxWidth: '95%', background: 'var(--surface, #000000ff)', padding: 16, borderRadius: 8, boxShadow: '0 6px 24px rgba(0,0,0,0.3)' }}>
+            <h3>Pridėti peržiūros vartotojus</h3>
+            {shareError && <div className="error">{shareError}</div>}
+            {usersLoading ? (
+              <div>Užkraunama vartotojai...</div>
+            ) : (
+              <div style={{ marginTop: 8 }}>
+                <input
+                  placeholder="Ieškoti vartotojo pagal vardą, pavardę arba el. paštą"
+                  value={userQuery}
+                  onChange={(e) => setUserQuery(e.target.value)}
+                  style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid var(--border)' }}
+                />
+                <div style={{ maxHeight: 300, overflow: 'auto', marginTop: 8 }}>
+                  {users.filter(u => {
+                    const uid = u.Id ?? u.id
+                    if (existingViewerIds.includes(uid)) return false
+                    if (!userQuery) return true
+                    const q = userQuery.toLowerCase()
+                    const name = `${u.Vardas ?? u.vardas ?? ''} ${u.Pavarde ?? u.pavarde ?? ''}`.toLowerCase()
+                    const email = (u.El_pastas ?? u.el_pastas ?? '').toLowerCase()
+                    return name.includes(q) || email.includes(q)
+                  }).map(u => {
+                    const uid = u.Id ?? u.id
+                    const name = `${u.Vardas ?? u.vardas ?? ''} ${u.Pavarde ?? u.pavarde ?? ''}`.trim() || (u.El_pastas ?? u.el_pastas)
+                    const checked = selectedUsers.includes(uid)
+                    return (
+                      <label key={uid} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
+                        <input type="checkbox" checked={checked} onChange={() => {
+                          setSelectedUsers(prev => prev.includes(uid) ? prev.filter(x => x !== uid) : [...prev, uid])
+                        }} />
+                        <span>{name} <span style={{ color: 'var(--muted)', marginLeft: 8 }}>{u.El_pastas ?? u.el_pastas}</span></span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+            <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+              <button className="btn" disabled={sharing || selectedUsers.length === 0} onClick={async () => {
+                setSharing(true)
+                setShareError('')
+                try {
+                  for (const uid of selectedUsers) {
+                    try {
+                      await createIrasasNaudotojas({ IrasasId: Number(id), NaudotojasId: uid })
+                    } catch (err) {
+                      console.warn('error adding viewer', uid, err)
+                    }
+                  }
+                  setShowShare(false)
+                  setSelectedUsers([])
+                  setUserQuery('')
+                } catch (err) {
+                  setShareError(err.response?.data?.message || err.message || 'Klaida pridedant vartotojus')
+                } finally {
+                  setSharing(false)
+                }
+              }}>{sharing ? 'Pridedama...' : 'Pridėti pasirinkti'}</button>
+              <button className="btn" style={{ background: '#666' }} onClick={() => { setShowShare(false); setShareError(''); setUserQuery('') }}>Uždaryti</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ marginTop: 16 }}>
         <h2>Komentarai ({comments.length})</h2>

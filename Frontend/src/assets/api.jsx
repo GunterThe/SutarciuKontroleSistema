@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 
-const API_BASE_URL = 'http://localhost:5184/api';
+const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || 'http://localhost:5184/api';
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
@@ -174,6 +174,20 @@ apiClient.interceptors.response.use(
 
     export const createIrasas = async (payload) => {
         const { data } = await apiClient.post('/Irasas', payload);
+        return data;
+    };
+
+    export const createIrasasNaudotojas = async (payload) => {
+        const { data } = await apiClient.post('/IrasasNaudotojas', payload);
+        return data;
+    };
+
+    export const deleteIrasasNaudotojas = async (irasasId, naudotojasId) => {
+        await apiClient.delete(`/IrasasNaudotojas/${irasasId}/${naudotojasId}`);
+    };
+
+    export const getIrasasViewers = async (irasasId) => {
+        const { data } = await apiClient.get(`/Irasas/${irasasId}/Viewers`);
         return data;
     };
 
