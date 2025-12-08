@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 18, 2025 at 05:59 PM
+-- Generation Time: Dec 08, 2025 at 01:37 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -34,14 +34,6 @@ CREATE TABLE `Comment` (
   `NaudotojasId` varchar(36) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `Comment`
---
-
-INSERT INTO `Comment` (`Id`, `CommentText`, `IrasasId`, `NaudotojasId`) VALUES
-(1, 'Patvirtinu sutarti.', 1, NULL),
-(2, 'Reikia papildomos informacijos apie nuomos terminus.', 3, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -68,8 +60,8 @@ CREATE TABLE `Irasas` (
 
 INSERT INTO `Irasas` (`Id`, `Id_dokumento`, `Pavadinimas`, `TagID`, `Isigaliojimo_data`, `Pabaigos_data`, `Dienos_pries`, `Dienu_daznumas`, `Archyvuotas`, `Kita_data`, `Pastas_kreiptis`) VALUES
 (1, 'DOC-0000000000000001', 'Pirkimo sutartis', 1, '2025-01-01 00:00:00', '2026-01-01 00:00:00', 30, 365, 0, NULL, 'contracts@example.com'),
-(2, 'DOC-0000000000000002', 'Darbo sutartis', 3, '2024-06-01 00:00:00', '2029-06-01 00:00:00', 14, 365, 1, NULL, 'hr@example.com'),
-(3, 'DOC-0000000000000003', 'Nuomos sutartis', 2, '2023-09-15 00:00:00', '2024-09-15 00:00:00', 7, 30, 1, '2024-09-15 00:00:00', 'legal@example.com');
+(2, 'DOC-0000000000000002', 'Darbo sutartis buh', 3, '2024-06-01 00:00:00', '2029-06-01 00:00:00', 14, 365, 1, NULL, 'hr@example.com'),
+(3, 'DOC-0000000000000003', 'Nuomos sutartis', 2, '2023-09-15 00:00:00', '2024-09-15 00:00:00', 7, 30, 0, '2024-09-15 00:00:00', 'legal@example.com');
 
 -- --------------------------------------------------------
 
@@ -112,6 +104,7 @@ CREATE TABLE `Naudotojas` (
 --
 
 INSERT INTO `Naudotojas` (`Id`, `Vardas`, `Pavarde`, `Gimimo_data`, `El_pastas`, `Adminas`, `PasswordHash`) VALUES
+('1', 'jonas', 'jonaitis', '1996-12-03', 'jonas@jonaitis.com', 0, '$2a$11$M/tprNWKZMd.GtSWL3zYjOumrxwByTEz83gPCoBV7oWPwNgEzJpKO'),
 ('30b4bb0b-1042-4615-bd46-0d0d079f67bc', 'buh', 'buh', '2025-11-17', 'buh@buh.com', 1, '$2a$11$sZImYhtCWF9BHxudFdm3bOMcNJvOIrwd41qjgMfJzNU9axdsp7Aoy'),
 ('3395c229-7f20-4080-8f8a-e28892dc9b0a', 'b', 'b', '2025-11-17', 'dsajkhqwieh@gmail.com', 0, '$2a$11$MAB7okn7JLxd0Wy3m5WzJ.pt2zzzG82KkQSsGPiNzZN0ENnrc0AQS');
 
@@ -122,8 +115,8 @@ INSERT INTO `Naudotojas` (`Id`, `Vardas`, `Pavarde`, `Gimimo_data`, `El_pastas`,
 --
 
 CREATE TABLE `RefreshToken` (
-  `Id` char(36) NOT NULL,
-  `Token` varchar(200) NOT NULL,
+  `Id` int(36) NOT NULL,
+  `Token` char(200) NOT NULL,
   `Expires` datetime(6) NOT NULL,
   `Revoked` datetime(6) DEFAULT NULL,
   `NaudotojasId` char(36) NOT NULL
@@ -134,8 +127,10 @@ CREATE TABLE `RefreshToken` (
 --
 
 INSERT INTO `RefreshToken` (`Id`, `Token`, `Expires`, `Revoked`, `NaudotojasId`) VALUES
-('32e96389-9ccd-4fe9-bcd6-95be43a96971', 'Ev1N+qiH2k8VhDFYzHB7exQf6BSbie4/8tPZYMI6FXlg/vrH0UHzFPstongIC/4gj2feJ3ojPzUQ/7D5s9nw1A==', '2025-11-25 12:57:17.884096', NULL, '3395c229-7f20-4080-8f8a-e28892dc9b0a'),
-('96ba3082-8de3-4422-aa77-d6bc669b51e8', '8tAAIRZ10Ejh2UGMlH8ozw12bZKiUDWE1VBB0+PU5GJILyKvBJeSREg3FNGVad3UDiB90ZdeaMVOgg/nKM+cPw==', '2025-11-25 12:54:11.230759', NULL, '30b4bb0b-1042-4615-bd46-0d0d079f67bc');
+(1, '++7iCqTw/7rkUDQuJpFtm7qlwyaG/FdtJ+xxdpFzLCcvOF9g/3Bor4X14z/S4BSgmsiFVQcAY8ZW9ewZOh7i2w==', '2025-12-15 12:20:16.328061', NULL, '30b4bb0b-1042-4615-bd46-0d0d079f67bc'),
+(2, 'qqWUczF00SSmoZ9VsBut9CMAfsydXowAfQHGK/7sOH9n91wM4R2XW7jqR44xhGCWeZ0Z8hmA8i/zsGTkEr4vvw==', '2025-12-15 12:22:16.305421', NULL, '30b4bb0b-1042-4615-bd46-0d0d079f67bc'),
+(3, 'uM+0/hs0Mc54WX/qmS9cnXitGrZw5hZ+gzRZWvIgtaoJF4BuiichJkYGD/E/PeSUKaAxNRiNyEC+Cjc4hU+8hw==', '2025-12-15 12:30:37.648432', NULL, '30b4bb0b-1042-4615-bd46-0d0d079f67bc'),
+(4, 'kBpg8GnP51nN7oITrMrqsg5aRatP9IlSqcR0OXLpEgUjsZRXdZUIhxsfXsX79tO4qtm0vlqZjTR0E6RRXsXS2A==', '2025-12-15 12:34:57.373441', NULL, '30b4bb0b-1042-4615-bd46-0d0d079f67bc');
 
 -- --------------------------------------------------------
 
@@ -155,6 +150,7 @@ CREATE TABLE `Tag` (
 INSERT INTO `Tag` (`Id`, `Name`) VALUES
 (1, 'Finance'),
 (3, 'HR'),
+(4, 'JO'),
 (2, 'Legal');
 
 --
@@ -214,7 +210,7 @@ ALTER TABLE `Tag`
 -- AUTO_INCREMENT for table `Comment`
 --
 ALTER TABLE `Comment`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `Irasas`
@@ -223,10 +219,16 @@ ALTER TABLE `Irasas`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
+-- AUTO_INCREMENT for table `RefreshToken`
+--
+ALTER TABLE `RefreshToken`
+  MODIFY `Id` int(36) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `Tag`
 --
 ALTER TABLE `Tag`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables

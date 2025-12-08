@@ -48,14 +48,18 @@ public class TokenService : ITokenService
 
     public RefreshToken CreateRefreshToken(Naudotojas user)
     {
-        var randomBytes = new byte[64];
-        Random.Shared.NextBytes(randomBytes);
-        var token = Convert.ToBase64String(randomBytes);
+        var randomNumber = new byte[64];
+        using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomNumber);
+        }
+        var token = Convert.ToBase64String(randomNumber);
         return new RefreshToken
         {
             Token = token,
             Expires = DateTime.UtcNow.AddDays(_options.RefreshTokenDays),
-            NaudotojasId = user.Id
+            NaudotojasId = user.Id,
+            Naudotojas = user
         };
     }
 }

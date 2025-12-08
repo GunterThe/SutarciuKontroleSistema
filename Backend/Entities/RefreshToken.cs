@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 public class RefreshToken
 {
     [Key]
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public int Id { get; set; }
 
     [Required]
     public string Token { get; set; } = string.Empty;

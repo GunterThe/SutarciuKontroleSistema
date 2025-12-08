@@ -22,7 +22,7 @@ public class AuthController : ControllerBase
     public record LoginRequest(string El_pastas, string Password);
     public record RefreshRequest(string RefreshToken);
 
-        [HttpPost("register")]
+    [HttpPost("register")]
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponse>> Register(RegisterRequest req)
     {
@@ -81,7 +81,7 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponse>> Refresh(RefreshRequest req)
     {
-        var tokenEntity = await _db.RefreshToken.Include(r => r.Naudotojas).FirstOrDefaultAsync(r => r.Token == req.RefreshToken);
+        var tokenEntity = await _db.RefreshToken.FirstOrDefaultAsync(r => r.Token.ToString().Equals(req.RefreshToken));
         if (tokenEntity == null || !tokenEntity.IsActive)
         {
             return Unauthorized(new { message = "Invalid refresh token" });
@@ -89,9 +89,9 @@ public class AuthController : ControllerBase
         // Revoke old
         tokenEntity.Revoked = DateTime.UtcNow;
 
-        var user = tokenEntity.Naudotojas!;
-        var newRefresh = _tokenService.CreateRefreshToken(user);
-        user.RefreshToken.Add(newRefresh);
+        var user = await _db.Naudotojas.FirstOrDefaultAsync(u => u.Id == tokenEntity.NaudotojasId);
+        var newRefresh = _tokenService.CreateRefreshToken(user!);
+        user!.RefreshToken.Add(newRefresh);
         await _db.SaveChangesAsync();
         var access = _tokenService.CreateAccessToken(user);
         return Ok(new AuthResponse(access, newRefresh.Token));
@@ -107,6 +107,25 @@ public class AuthController : ControllerBase
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    public record GeneratedRefreshToken(string Token, DateTime ExpiresOn);
+    
+    private GeneratedRefreshToken GenerateRefreshToken()
+    {
+        var randomNumber = new byte[64];
+        using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomNumber);
+        }
+
+        var refreshToken = new GeneratedRefreshToken(
+            Token: Convert.ToBase64String(randomNumber),
+            ExpiresOn: DateTime.UtcNow.AddDays(7)
+        );
+
+        return refreshToken;
+    }
+
 
     [HttpGet("token")]
     [Authorize]
