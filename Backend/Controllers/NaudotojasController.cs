@@ -16,7 +16,6 @@ public class NaudotojasController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Naudotojas>))]
-    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> GetAll() => Ok(await _db.Naudotojas.AsNoTracking().ToListAsync());
 
     [HttpGet("{id}")]

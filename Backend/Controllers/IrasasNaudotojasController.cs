@@ -37,7 +37,6 @@ public class IrasasNaudotojasController : ControllerBase
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(IrasasNaudotojas))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Create([FromBody] IrasasNaudotojas model)
     {
         _db.IrasasNaudotojas.Add(model);

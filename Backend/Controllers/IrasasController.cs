@@ -134,8 +134,24 @@ public class IrasasController : ControllerBase
         model.Naudotojai = model.Naudotojai ?? new List<IrasasNaudotojas>();
         model.Comments = model.Comments ?? new List<Comment>();
 
+        // Save the Irasas first
         _db.Irasas.Add(model);
         await _db.SaveChangesAsync();
+
+        // Link the creator as an IrasasNaudotojas so they have access (and management rights)
+        var currentUserId = User.GetUserId();
+        if (!string.IsNullOrEmpty(currentUserId))
+        {
+            var assignee = new IrasasNaudotojas
+            {
+                IrasasId = model.Id,
+                NaudotojasId = currentUserId,
+                Prekes_Adminas = true
+            };
+            _db.IrasasNaudotojas.Add(assignee);
+            await _db.SaveChangesAsync();
+        }
+
         return CreatedAtAction(nameof(Get), new { id = model.Id }, model);
     }
 

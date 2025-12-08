@@ -7,6 +7,9 @@ const apiClient = axios.create({
     baseURL: API_BASE_URL,
 });
 
+let isRefreshing = false;
+let pendingRequests = [];
+
 apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -19,16 +22,46 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
     (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            // Only force a global redirect if we previously had a token (meaning an authenticated
-            // call failed). For failed anonymous calls (e.g. invalid login), do not reload the page
-            // so the UI can show the server-provided error message.
-            const hadToken = !!localStorage.getItem('token');
-            if (hadToken) {
-                localStorage.removeItem("token");
-                try { window.dispatchEvent(new Event('authChange')) } catch {}
-                window.location.href = "/";
+    async (error) => {
+        const originalRequest = error.config;
+        // If unauthorized and we have a refresh token, try refreshing once
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            const refreshToken = localStorage.getItem('refreshToken');
+            const hadAccessToken = !!localStorage.getItem('token');
+            if (refreshToken && hadAccessToken) {
+                originalRequest._retry = true;
+                try {
+                    if (isRefreshing) {
+                        // queue until refresh finishes
+                        return new Promise((resolve, reject) => {
+                            pendingRequests.push({ resolve, reject, originalRequest });
+                        });
+                    }
+                    isRefreshing = true;
+                    const { data } = await axios.post(`${API_BASE_URL}/Auth/refresh`, { RefreshToken: refreshToken });
+                    if (data?.accessToken) {
+                        localStorage.setItem('token', data.accessToken);
+                    }
+                    if (data?.refreshToken) {
+                        localStorage.setItem('refreshToken', data.refreshToken);
+                    }
+                    try { window.dispatchEvent(new Event('authChange')) } catch {}
+                    // resume queued requests
+                    pendingRequests.forEach(({ resolve }) => resolve(apiClient(originalRequest)));
+                    pendingRequests = [];
+                    return apiClient(originalRequest);
+                } catch (refreshErr) {
+                    // refresh failed: clear tokens and redirect to login
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('refreshToken');
+                    try { window.dispatchEvent(new Event('authChange')) } catch {}
+                    pendingRequests.forEach(({ reject }) => reject(refreshErr));
+                    pendingRequests = [];
+                    // propagate original error
+                    return Promise.reject(error);
+                } finally {
+                    isRefreshing = false;
+                }
             }
         }
         return Promise.reject(error);
