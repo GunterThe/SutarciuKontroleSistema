@@ -124,6 +124,34 @@ public class IrasasController : ControllerBase
         return Ok(Naudotojai);
     }
 
+    [HttpGet("{id}/Viewers")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<object>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> GetIrasasViewers(int id)
+    {
+        var currentUserId = User.GetUserId();
+        var isAdmin = User.IsAdmin();
+        if (!isAdmin)
+        {
+            var hasAccess = await _db.IrasasNaudotojas.AnyAsync(x => x.IrasasId == id && x.NaudotojasId == currentUserId);
+            if (!hasAccess) return Forbid();
+        }
+
+        var viewers = await _db.IrasasNaudotojas
+            .AsNoTracking()
+            .Where(x => x.IrasasId == id)
+            .Include(x => x.Naudotojas)
+            .Select(x => new {
+                Id = x.Naudotojas!.Id,
+                Vardas = x.Naudotojas!.Vardas,
+                Pavarde = x.Naudotojas!.Pavarde,
+                El_pastas = x.Naudotojas!.El_pastas
+            })
+            .ToListAsync();
+
+        return Ok(viewers);
+    }
+
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Irasas))]
