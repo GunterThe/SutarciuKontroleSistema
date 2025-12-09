@@ -35,7 +35,7 @@ services:
     ports:
       - "8080:8080"
   frontend:
-    image: node:18-alpine
+    image: node:20-alpine
     container_name: sutarciu-frontend
     working_dir: /app
     volumes:
