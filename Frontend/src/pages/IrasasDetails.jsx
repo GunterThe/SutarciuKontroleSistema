@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getIrasasById, getCommentsForIrasas, createComment, getNaudotojai, createIrasasNaudotojas, getIrasasViewers } from '../assets/api.jsx'
 
@@ -18,6 +18,49 @@ export default function IrasasDetails() {
   const [selectedUsers, setSelectedUsers] = useState([])
   const [sharing, setSharing] = useState(false)
   const [shareError, setShareError] = useState('')
+  const modalRef = useRef(null)
+  const lastFocusedRef = useRef(null)
+
+  useEffect(() => {
+    if (!showShare) return;
+    // Save last focused element to restore later
+    lastFocusedRef.current = document.activeElement;
+    const modal = modalRef.current;
+    const selector = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const focusable = modal ? Array.from(modal.querySelectorAll(selector)) : [];
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (first) first.focus();
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setShowShare(false);
+        return;
+      }
+      if (e.key === 'Tab') {
+        if (!focusable.length) {
+          e.preventDefault();
+          return;
+        }
+        const active = document.activeElement;
+        if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+        if (e.shiftKey && active === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      // restore focus
+      try { lastFocusedRef.current?.focus?.(); } catch {}
+    };
+  }, [showShare]);
 
   useEffect(() => {
     let mounted = true
@@ -106,7 +149,7 @@ export default function IrasasDetails() {
 
       {showShare && (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', zIndex: 30 }}>
-          <div style={{ width: 720, maxWidth: '95%', background: 'var(--surface, #000000ff)', padding: 16, borderRadius: 8, boxShadow: '0 6px 24px rgba(0,0,0,0.3)' }}>
+          <div role="dialog" aria-modal="true" ref={modalRef} tabIndex={-1} style={{ width: 720, maxWidth: '95%', background: 'var(--surface, #ffffff)', padding: 16, borderRadius: 8, boxShadow: '0 6px 24px rgba(0,0,0,0.3)' }}>
             <h3>Pridėti peržiūros vartotojus</h3>
             {shareError && <div className="error">{shareError}</div>}
             {usersLoading ? (
@@ -116,6 +159,7 @@ export default function IrasasDetails() {
                 <input
                   placeholder="Ieškoti vartotojo pagal vardą, pavardę arba el. paštą"
                   value={userQuery}
+                  // ensure the search input is reachable as the first focusable element
                   onChange={(e) => setUserQuery(e.target.value)}
                   style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid var(--border)' }}
                 />
@@ -170,6 +214,7 @@ export default function IrasasDetails() {
           </div>
         </div>
       )}
+
 
       <div style={{ marginTop: 16 }}>
         <h2>Komentarai ({comments.length})</h2>

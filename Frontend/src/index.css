@@ -88,3 +88,33 @@ input:focus, textarea:focus { outline: none; box-shadow: 0 0 0 4px rgba(91,129,2
   .card { padding: 18px; border-radius: 12px; }
 }
  
+/* Responsive images and media */
+img, picture, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Smooth transitions for interactive elements */
+input, select, textarea, .btn, .nav a, .nav-toggle {
+  transition: box-shadow 180ms ease, transform 120ms ease, opacity 120ms ease;
+}
+.btn:hover { transform: translateY(-2px); }
+
+/* Footer styles */
+.site-footer { margin-top: 28px; padding: 18px 0; color: var(--muted); }
+.site-footer .container { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.site-footer a { color: var(--muted); font-weight:600; }
+
+/* Responsive nav: hide links on narrow screens, show toggle */
+.nav { position: relative; }
+.nav-links { display:flex; align-items:center; gap:12px; }
+.nav-toggle { display:none; background:transparent; border:0; color:var(--text); padding:8px; border-radius:8px; cursor:pointer }
+
+@media (max-width: 768px) {
+  .nav-links { display:none; position:absolute; top:56px; right:12px; background: linear-gradient(180deg, rgba(18,23,53,0.95), rgba(12,16,40,0.95)); border:1px solid var(--border); padding:12px; border-radius:12px; flex-direction:column; min-width:200px; }
+  .nav-links.open { display:flex; }
+  .nav-toggle { display:inline-flex; }
+  .nav a { display:block; padding:8px 6px; }
+}
+ 

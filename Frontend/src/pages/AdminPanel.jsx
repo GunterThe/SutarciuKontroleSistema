@@ -113,7 +113,6 @@ export default function AdminPanel() {
             <div key={u.Id ?? u.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>{u.Vardas ?? u.vardas} {u.Pavarde ?? u.pavarde} ({u.El_pastas ?? u.el_pastas})</div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <Link className="btn" to={`/naudotojas/${u.Id ?? u.id}`}>Atidaryti</Link>
                 <button className="btn" onClick={async () => { if (confirm('Trinti naudotoją?')) { await deleteNaudotojas(u.Id ?? u.id); await loadAll() } }}>Ištrinti</button>
               </div>
             </div>
