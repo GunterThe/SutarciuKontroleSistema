@@ -28,3 +28,30 @@ Administratorius galės:
 Archyvuoti/redaguoti visų naudotojų įrašus
 Ištrinti archyvuotus įrašus
 Tą patį ką ir naudotojas
+
+### 2. Sistemos architektūra
+
+Sistemos sudedamos dalys:
+Kliento pusė – naudos React.js
+Serverio pusė – naudojant C# .NET. Duomenų bazė – SQL. 
+
+![alt text](images/1.png)
+
+
+### 3. Naudotojo sąsajos projektas
+
+![alt text](images/2.png)
+![alt text](images/3.png)
+![alt text](images/4.png)
+![alt text](images/5.png)
+
+### 4. OpenAPI specifikacija
+
+https://github.com/GunterThe/SutarciuKontroleSistema/blob/main/api-spec.yaml
+
+### 4. Išvados
+
+Buvo įgauta patirties kurti pilnos apimties saityno projektus, kuriuos sudaro serverio ir kliento dalies logika.
+Buvo išmokta kaip dokumentuoti ir teisingai, pagal standartus, apsirašyti API metodus.
+Buvo įgautos žinios kaip naudotis JWT autentifikacija.
+Buvo įgytą patirtis naudojantis hostinimo servisais kaip google cloud.
